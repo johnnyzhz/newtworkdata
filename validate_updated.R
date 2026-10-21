@@ -24,6 +24,39 @@ wave_data <- lapply(wave_files, read_csv, show_col_types = FALSE)
 grad_data <- read_csv(file.path(input_dir, "graduation.csv"), show_col_types = FALSE)
 final_data <- read_csv(file.path(input_dir, "final.csv"), show_col_types = FALSE)
 
+rename_alcohol <- function(df) {
+  names(df) <- sub("^drink", "alcohol", names(df))
+  df
+}
+
+weekly_data <- lapply(weekly_data, rename_alcohol)
+
+baseline_data <- dplyr::rename(baseline_data, alcohol = any_of("drinking"))
+grad_data <- rename_alcohol(grad_data)
+final_data <- rename_alcohol(final_data)
+wave_data <- lapply(wave_data, rename_alcohol)
+
+
+output_dir <- "recoded-files-final/"
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Save
+names(weekly_data) <- paste0("w", 1:30)
+mapply(
+  \(df, name) write_csv(df, file.path(output_dir, paste0(name, ".csv"))),
+  weekly_data, names(weekly_data)
+)
+
+write_csv(baseline_data, file.path(output_dir, "baseline.csv"))
+write_csv(grad_data, file.path(output_dir, "graduation.csv"))
+write_csv(final_data, file.path(output_dir, "final.csv"))
+
+names(wave_data) <- c(paste0("10week", 1:9))
+mapply(
+  \(df, name) write_csv(df, file.path(output_dir, paste0(name, ".csv"))),
+  wave_data, names(wave_data)
+)
+
 
 
 ids <- paste0("s", 1:47)
@@ -276,7 +309,7 @@ baseline_vars <- c(
   "weight",
   "score",
   "smoking",
-  "drinking",
+  "alcohol",
   paste0("BF", 1:20),
   paste0("PHQ", 1:7),
   paste0("L", 1:10),
@@ -286,12 +319,12 @@ weekly_vars <- c(
   "smoke",
   "smoke_days",
   "smoke_num",
-  "drink",
-  "drink_days",
-  "drink_num",
-  "drink_3",
-  "drink_4",
-  "drink_5",
+  "alcohol",
+  "alcohol_days",
+  "alcohol_num",
+  "alcohol_3",
+  "alcohol_4",
+  "alcohol_5",
   "friends",
   "contact",
   "social",
@@ -310,7 +343,7 @@ weekly_vars <- c(
 )
 
 # rename vars
-wave_demo_vars <- c("age", "gender", "height", "weight", "score", "smoke", "drink")
+wave_demo_vars <- c("age", "gender", "height", "weight", "score", "smoke", "alcohol")
 wave_personality_vars <- paste0("BF", 1:20)
 wave_depression_vars <- paste0("PHD", 1:7)
 wave_loneliness_vars <- paste0("L", 1:10)
@@ -464,3 +497,4 @@ ggsave(
   width = 11,
   height = 7
 )
+
