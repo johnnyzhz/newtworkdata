@@ -263,10 +263,6 @@ write_csv(
   file.path(output_dir, "scale_descriptives.csv")
 )
 
-write_csv(
-  efa_table,
-  file.path(output_dir, "factor_loadings.csv")
-)
 
 write_csv(
   score_data,
@@ -290,7 +286,20 @@ if (nrow(score_data) > 0) {
       x = "mean scale score",
       y = "frequency"
     ) +
-    theme_minimal()
+    theme_minimal()+
+    theme_minimal(base_size = 11) +
+    theme(
+      strip.text = element_text(face = "bold")
+    )+
+    theme_minimal(base_size = 14) +
+    theme(
+      strip.text = element_text(size = 16, face = "bold"),
+      axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+      axis.title = element_text(size = 16),
+      axis.text = element_text(size = 14),
+      legend.title = element_text(size = 16),
+      legend.text = element_text(size = 14)
+    )
   
   ggsave(
     file.path(
@@ -323,6 +332,19 @@ if (nrow(score_data) > 0) {
         hjust = 1,
         size = 6
       )
+    )+
+    theme_minimal(base_size = 11) +
+    theme(
+      strip.text = element_text(face = "bold")
+    )+
+    theme_minimal(base_size = 14) +
+    theme(
+      strip.text = element_text(size = 16, face = "bold"),
+      axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+      axis.title = element_text(size = 16),
+      axis.text = element_text(size = 14),
+      legend.title = element_text(size = 16),
+      legend.text = element_text(size = 14)
     )
   
   ggsave(
@@ -404,7 +426,21 @@ p_alpha <- alpha_table %>%
       hjust = 1,
       size = 7
     )
+  )+
+  theme_minimal(base_size = 11) +
+  theme(
+    strip.text = element_text(face = "bold")
+  )+
+  theme_minimal(base_size = 14) +
+  theme(
+    strip.text = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14)
   )
+
 
 ggsave(
   file.path(output_dir, "alpha_by_dataset.png"),
@@ -625,6 +661,15 @@ p_cont <- continuous_summary %>%
       size = 7
     ),
     strip.text = element_text(face = "bold")
+  )+
+theme_minimal(base_size = 14) +
+  theme(
+    strip.text = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14)
   )
 
 p_cont <- p_cont +
@@ -671,6 +716,15 @@ p_cat <- categorical_summary %>%
       size = 7
     ),
     strip.text = element_text(face = "bold")
+  )+
+  theme_minimal(base_size = 14) +
+  theme(
+    strip.text = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14)
   )
 
 # baseline plot

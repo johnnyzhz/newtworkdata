@@ -415,60 +415,190 @@ ggsave(
   height = 9
 )
 
-followup_missing <- pmap_dfr(list(
-  all_surveys[-1],
-  metadata$timepoint[-1],
-  metadata$group[-1],
-  metadata$collection_date[-1]
-), function(dat, timepoint, group, collection_date) {
-  vars <- if (group == "weekly") {
-    weekly_vars
-  } else {
-    wave_vars
-  }
-  missing_for_survey(dat, timepoint, group, collection_date, vars)
-})
-# write_csv(followup_missing, 'validation/followup_covariate_missingness.csv')
 
-# heatmap for covs for all timepoints
+
+# follow-up survets
+
+missing_for_survey <- function(dat, timepoint, group,
+                               collection_date, vars) {
+  
+  
+
+  
+  smoke_vars <- c("smoke_days", "smoke_num")
+  
+  alcohol_vars <- c(
+    "alcohol_days", "alcohol_num",
+    "alcohol_3", "alcohol_4", "alcohol_5"
+  )
+  
+  map_dfr(vars, function(v) {
+    
+    administered <- v %in% names(dat)
+    
+    if (!administered) {
+      return(tibble(
+        timepoint = timepoint,
+        group = group,
+        collection_date = collection_date,
+        variable = v,
+        administered = FALSE,
+        missing_rate = NA_real_
+      ))
+    }
+    
+    # Identify missing values
+    missing <- is.na(dat[[v]])
+    
+    # Structural missingness is treated as non-missing
+    if (v %in% smoke_vars && "smoke" %in% names(dat)) {
+      structural <- !is.na(dat$smoke) & dat$smoke == 0
+      missing[structural] <- FALSE
+    }
+    
+    if (v %in% alcohol_vars && "alcohol" %in% names(dat)) {
+      structural <- !is.na(dat$alcohol) & dat$alcohol == 0
+      missing[structural] <- FALSE
+    }
+    
+    if (v == "graduation_other" && "graduation_plan" %in% names(dat)) {
+      structural <- !is.na(dat$graduation_plan)
+      missing[structural] <- FALSE
+    }
+    
+    # Denominator includes all participants
+    missing_rate <- if (nrow(dat) > 0) {
+      mean(missing)
+    } else {
+      NA_real_
+    }
+    
+    
+  
+    
+    tibble(
+      timepoint = timepoint,
+      group = group,
+      collection_date = collection_date,
+      variable = v,
+      administered = TRUE,
+      missing_rate = missing_rate
+    )
+  })
+}
+
+
+
+followup_missing <- pmap_dfr(
+  list(
+    all_surveys[-1],
+    metadata$timepoint[-1],
+    metadata$group[-1],
+    metadata$collection_date[-1]
+  ),
+  function(dat, timepoint, group, collection_date) {
+    
+    vars <- if (group == "weekly") {
+      weekly_vars
+    } else {
+      wave_vars
+    }
+    
+    missing_for_survey(
+      dat,
+      timepoint,
+      group,
+      collection_date,
+      vars
+    )
+  }
+)
+
+# Save missingness results
+# write_csv(
+#   followup_missing,
+#   "validation/followup_covariate_missingness.csv"
+# )
+
+
+
 followup_order <- metadata %>%
   filter(group != "baseline") %>%
   arrange(collection_date, survey_order) %>%
   pull(timepoint)
 
+
 followup_missing <- followup_missing %>%
-  mutate(timepoint = factor(timepoint, levels = followup_order))
+  mutate(
+    timepoint = factor(
+      timepoint,
+      levels = followup_order
+    )
+  )
+
 
 missing_plot <- function(dat, title) {
-  ggplot(dat, aes(timepoint, variable, fill = missing_rate)) +
+  
+  ggplot(
+    dat,
+    aes(timepoint, variable, fill = missing_rate)
+  ) +
     geom_tile(color = "grey90") +
     scale_fill_gradient(
       low = "white",
       high = "steelblue",
       limits = c(0, 1),
       na.value = "grey85",
-      name = "Missing"
+      name = "missing"
     ) +
-    geom_text(aes(label = ifelse(
-      administered,
-      scales::percent(missing_rate, accuracy = 1),
-      "—"
-    )), size = 0.8) +
+    geom_text(
+      aes(
+        label = case_when(
+          !administered ~ "—",
+          is.na(missing_rate) ~ "N/A",
+          TRUE ~ scales::percent(
+            missing_rate,
+            accuracy = 1
+          )
+        )
+      ),
+      size = 0.8
+    ) +
     labs(
       x = "data collection",
       y = NULL,
-      title = title,
-      caption = "grey = variable absent from survey; columns ordered by data collection date."
+      title = title
     ) +
-    theme_classic(base_size = 12) +
-    theme(axis.text.x = element_text(
-      angle = 90,
-      hjust = 1,
-      vjust = 0.5
-    ))
+    theme_classic(base_size = 15) +
+    theme(
+      axis.text.x = element_text(
+        angle = 90,
+        hjust = 1,
+        vjust = 0.5
+      )
+    )
 }
 
-p_followup <- missing_plot(followup_missing, "longitudinal covariates missingness")
+
+
+p_followup <- missing_plot(
+  followup_missing,
+  "Follow-up Covariate Missingness"
+)
+
+print(p_followup)
+
+# Save plot
+# ggsave(
+#   "validation/followup_covariate_missingness.png",
+#   p_followup,
+#   width = 16,
+#   height = 10,
+#   dpi = 300
+# )
+
+
+p_followup <- missing_plot(followup_missing, "")
 ggsave(
   "validation/followup_covariate_missingness.pdf",
   p_followup,

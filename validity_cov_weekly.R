@@ -169,6 +169,14 @@ p_cont <- continuous_summary %>%
   theme_minimal(base_size = 11) +
   theme(
     strip.text = element_text(face = "bold")
+  )+
+  theme_minimal(base_size = 14) +
+  theme(
+    strip.text = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14)
   )
 
 p_cat <- categorical_summary %>%
@@ -201,6 +209,15 @@ p_cat <- categorical_summary %>%
   theme_minimal(base_size = 11) +
   theme(
     strip.text = element_text(face = "bold")
+  )+
+theme_minimal(base_size = 14) +
+  theme(
+    strip.text = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14)
   )
 
 
