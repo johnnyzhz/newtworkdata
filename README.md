@@ -19,3 +19,5 @@ The study was approved by the Institutional Review Board of the University of No
 - postgrad.R: analyze questions on postgrad plans
 
 ## Data Usage Agreement (DUA)
+
+The dataset should be used for research purposes, and users should not attempt to identify individual participants or disclose potentially identifying information. Users should appropriately acknowledge the dataset and cite its accompanying publication in any research outputs. If you use this dataset in your research, please cite the accompanying data descriptor: Multiple-Scale Longitudinal Friendship Network Data (MSLFND): A Dataset on Dynamic Friendship Evolution With Time-Varying and Time-Invariant Covariates. Full citation details and DOI will be added when available.
